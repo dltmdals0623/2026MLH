@@ -1,0 +1,25 @@
+﻿version 3.00
+cm_version 1.0
+platform CM-530
+o main
+o begin
+o while(1)
+o begin
+o wait param_src:cm:2 lop:== param_src:bool_num:0 rop:then
+o load param_dest:var:rec param_src:cm:1
+o if param_src:var:rec lop:== param_src:dec_num:65535 rop:then
+o begin
+o load param_dest:cm:0 param_src:dec_num:65535
+o load param_dest:cm:18 param_src:dec_num:0
+o end
+o else
+o begin
+o compute param_dest:var:key param_src:var:rec aop:& param_src:dec_num:63488
+o compute param_dest:var:key param_src:var:key aop:/ param_src:dec_num:2048
+o compute param_dest:var:data param_src:var:rec aop:& param_src:dec_num:2047
+o load param_dest:cm:0 param_src:var:rec
+o compute param_dest:var:pos param_src:var:data aop:* param_src:dec_num:10
+o load param_dest:motor:5:106 param_src:var:pos
+o end
+o end
+o end
