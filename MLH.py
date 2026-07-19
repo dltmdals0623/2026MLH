@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 import tracker as tr
-import packet
+import packet as pk
 import lane
 import param as p
 import ik
@@ -15,10 +15,10 @@ class MLH:                                                                      
     def __init__(self):                                                                             #생성자
         logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(lineno)d] %(message)s")    #로그 출력 형식 설정
         self.cap =   cv2.VideoCapture(0)                #카메라 연결
-        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
-        # self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
-        # self.cap.set(cv2.CAP_PROP_EXPOSURE, -6.5)
-        # self.cap.set(cv2.CAP_PROP_FPS, 30)
+        # self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
+        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+        self.cap.set(cv2.CAP_PROP_EXPOSURE, -7.5)
+        self.cap.set(cv2.CAP_PROP_FPS, 30)
         self.frame_cnt=0
         self.st  =   time.time()
         self.prev=0
@@ -45,7 +45,7 @@ class MLH:                                                                      
             dst = cv2.GaussianBlur(src, (0, 0), 10)                                                                 #기본 화면에 강도 10의 블러 효과
             hsv = cv2.cvtColor(dst, cv2.COLOR_BGR2HSV)                                                              #기본 화면의 BGR 색공간을 HSV 색공간으로 변환
             cam_h, cam_w = dst.shape[:2]                                                                  #카메라 화면의 높이와 너비 추출
-            line_mask = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)                                      #라인 HSV 범위로 HSV 화면 이진화
+            line_mask = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)                                  #라인 HSV 범위로 HSV 화면 이진화
             # line_mask[:int(cam_h*UPPER_LINE_MASK_LIMIT), :] = 0                                           #라인 감지 한계 위쪽 값 버림
             # line_mask[int(cam_h*LOWER_LINE_MASK_LIMIT):, :] = 0                                           #라인 감지 한계 아래쪽 값 버림
 
@@ -57,8 +57,6 @@ class MLH:                                                                      
                 cv2.line(tmpmask, (cam_w//2, int(cam_h*p.CURRENT_LINE)), c, (  0,  0,255), 2)
                 dst= cv2.addWeighted(dst, 1.0, tmpmask, 1.0, 0)
             theta, linw_w = lane.get_theta((cam_w//2, cam_h *p.CURRENT_LINE),c)
-
-            cal_joint_offset
 
             cv2.imshow("dst", dst)                                      #기본 입력 화면 출력
             cv2.imshow("line", line_mask)                             #라인 감지 화면 출력

@@ -4,7 +4,7 @@ import logging
 import tracker as tr
 import param as p
 
- 
+
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s %(lineno)d] %(message)s", datefmt="%H:%M:%S")
 
 def get_theta(pos1, pos2):                                                            #세타 계산

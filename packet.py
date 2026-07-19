@@ -2,15 +2,14 @@ import time
 import serial
 import logging
 
-
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(lineno)d] %(message)s")
-PORT="COM4"
- 
+PORT="COM3"
+
 try:
     ser = serial.Serial(port=PORT,
                         baudrate=57600,
                         parity=serial.PARITY_NONE,
-                        stopbits=serial.STOPBITS_ONE,
+                        stopbits=serial.STOPBITS_ONE,   
                         bytesize=serial.EIGHTBITS,
                         timeout=0)
     ser_enabled = True
@@ -43,7 +42,7 @@ def serial_raw(val):
 #키, 데이터로 시리얼 전송하는 함수
 def serial_write(key, data):
     if key < 0 or key > 31 or data < 0 or data > 2046:
-        if key < 0 or key > 1:
+        if key < 0 or key > 31:
             logging.error(f"key '{key}' is out of range (0~31)")
         if data < 0 or data > 2046:
             logging.error(f"data '{data}' is out of range (0~2046)")
@@ -69,6 +68,8 @@ def wait_ack(expected_ack=65535, timeout=3.0):
 
 #튜플 가변인자로 패킷 수신 함수
 def packet_write(*args):
+    if not ser_enabled:
+        return False
     serial_raw(65535)                                   #패킷 시작 신호를 보낸다
     if not wait_ack():
         logging.error("Packet [START] ACK Timeout!")
