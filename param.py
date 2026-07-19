@@ -13,3 +13,7 @@ UPPER_LINE_MASK_LIMIT = 0.30               #라인 감지 한계_상
 LOWER_LINE_MASK_LIMIT = 1.00               #라인 감지 한계_하
 
 CURRENT_LINE = 1.50               #로봇 추정 위치 (세타값 중심점)
+
+L1=27
+L2=38.0
+L3=86.0
