@@ -80,17 +80,37 @@ def get_joint_positions(th1, th2, th3):
 # ==========================================
 # 2. 모터 오프셋 계산 함수
 # ==========================================
-def cal_joint_offset(target_xyz, inv=0):
-    ik_res = calculate_ik_3dof(*target_xyz)
+def cal_leg_offset(delta_xyz, inv=0):
+    if delta_xyz == [0,0,0]:
+        return [0,0,0]
+    ik_res = calculate_ik_3dof(9+delta_xyz[0],27+delta_xyz[1],-108+delta_xyz[2])
     if ik_res is None:
         return None
-    offset1 = (lambda th: (512 - int((math.degrees(th) + 180.0) * (1024 / 360))) *(1 -2*inv) +512)(ik_res[0])
+    offset1 = (lambda th: (512 - int((math.degrees(th) + 180.0) * (1024 / 360)))  +512)(ik_res[0])
     offset2 = (lambda th: (653 - int((math.degrees(th) + 180.0) * (1024 / 360))) *(1 -2*inv) +512)(ik_res[1])
     offset3 = (lambda th: (696 - int((math.degrees(th) + 180.0) * (1024 / 360))) *(1 -2*inv) +512)(ik_res[2])
 
     return [offset1, offset2, offset3]
 
+def cal_offset(delta_x):
+    fl=cal_leg_offset([delta_x,0,0],0)
+    fr=cal_leg_offset([delta_x,0,0],1)
+    bl=cal_leg_offset([-delta_x,0,0],0)
+    br=cal_leg_offset([-delta_x,0,0],1)
 
+    # print(fl)
+    # print(fr)
+    # print(bl)
+    # print(br)
+    offsets=[]
+    for i in range(3):
+        offsets.append(fl[i])
+        offsets.append(fr[i])
+        offsets.append(bl[i])
+        offsets.append(br[i])
+
+    print(offsets)
+    return offsets
 
 # ==========================================
 # 3. Tkinter 3D GUI 시각화 클래스
@@ -112,7 +132,7 @@ class RobotLegApp:
 
         tk.Label(ctrl_frame, text="목표 좌표 (Target XYZ)", font=("Arial", 11, "bold")).pack(pady=5)
         self.scale_x = tk.Scale(ctrl_frame, from_=-100, to=100, orient=tk.HORIZONTAL, label="X 좌표", length=220, command=self.update_view)
-        self.scale_x.set(0)
+        self.scale_x.set(9)
         self.scale_x.pack()
 
         self.scale_y = tk.Scale(ctrl_frame, from_=-20, to=150, orient=tk.HORIZONTAL, label="Y 좌표", length=220, command=self.update_view)
@@ -120,7 +140,7 @@ class RobotLegApp:
         self.scale_y.pack()
 
         self.scale_z = tk.Scale(ctrl_frame, from_=-120, to=-50, orient=tk.HORIZONTAL, label="Z 좌표", length=220, command=self.update_view)
-        self.scale_z.set(-106)
+        self.scale_z.set(-108)
         self.scale_z.pack()
 
         tk.Label(ctrl_frame, text="------------------------------").pack(pady=5)
@@ -227,8 +247,9 @@ class RobotLegApp:
             render_list.append({'type': 'text', 'coords': (sx2, sy2), 'depth': d2, 'text': label, 'color': 'gray'})
 
         if joints:
-            print(*[(key, data) for key, data in zip([1,5,9,2,6,10,3,7,11,4,8,12],[*cal_joint_offset(joints[3],0)+cal_joint_offset(joints[3],1)]*2)])
-            pk.packet_write(*[(key, data) for key, data in zip([1,5,9,2,6,10,3,7,11,4,8,12],[*cal_joint_offset(joints[3],0)+cal_joint_offset(joints[3],1)]*2)])
+            # print(*[(key, data) for key, data in zip([1,5,9,2,6,10,3,7,11,4,8,12],[*cal_joint_offset(joints[3],0)+cal_joint_offset(joints[3],1)]*2)])
+            # pk.packet_write(*[(key, data) for key, data in zip([1,5,9,2,6,10,3,7,11,4,8,12],[*cal_joint_offset(joints[3],0)+cal_joint_offset(joints[3],1)]*2)])
+            cal_offset(self.scale_x.get())
 
             sx, sy, d = self.project_3d(*joints[0], az, el)
             render_list.append({'type': 'dot', 'coords': (sx, sy), 'depth': d, 'color': 'black' if not color_dim else 'gray', 'r': self.get_perspective_radius(d)})

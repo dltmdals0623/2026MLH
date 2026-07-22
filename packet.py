@@ -55,6 +55,8 @@ def serial_write(key, data):
 
 #입력받은 응답값 기다리는 함수
 def wait_ack(expected_ack=65535, timeout=3.0):
+    if not ser_enabled:
+        return False
     start_time = time.time()
     while time.time() - start_time < timeout:
         if ser.in_waiting >= 6:
