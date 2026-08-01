@@ -81,8 +81,8 @@ def get_joint_positions(th1, th2, th3):
 # 2. 모터 오프셋 계산 함수
 # ==========================================
 def cal_leg_offset(delta_xyz, inv=0):
-    if delta_xyz == [0,0,0]:
-        return [0,0,0]
+    # if delta_xyz == [0,0,0]:
+    #     return [512,512,512]
     ik_res = calculate_ik_3dof(9+delta_xyz[0],27+delta_xyz[1],-108+delta_xyz[2])
     if ik_res is None:
         return None
@@ -93,10 +93,12 @@ def cal_leg_offset(delta_xyz, inv=0):
     return [offset1, offset2, offset3]
 
 def cal_offset(delta_x):
+    if not delta_x:
+        return [(i,512) for i in range(1, 13)]
     fl=cal_leg_offset([delta_x,0,0],0)
-    fr=cal_leg_offset([delta_x,0,0],1)
+    fr=cal_leg_offset([-delta_x,0,0],1)
     bl=cal_leg_offset([-delta_x,0,0],0)
-    br=cal_leg_offset([-delta_x,0,0],1)
+    br=cal_leg_offset([delta_x,0,0],1)
 
     # print(fl)
     # print(fr)
@@ -104,12 +106,11 @@ def cal_offset(delta_x):
     # print(br)
     offsets=[]
     for i in range(3):
-        offsets.append(fl[i])
-        offsets.append(fr[i])
-        offsets.append(bl[i])
-        offsets.append(br[i])
+        offsets.append((1+4*i, fl[i]))
+        offsets.append((2+4*i, fr[i]))
+        offsets.append((3+4*i, bl[i]))
+        offsets.append((4+4*i, br[i]))
 
-    print(offsets)
     return offsets
 
 # ==========================================
