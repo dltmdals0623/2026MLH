@@ -1,6 +1,5 @@
 import time
 import serial
-import param as p
 
 ser_enabled = False
 
@@ -10,7 +9,7 @@ try:
                         parity=serial.PARITY_NONE,
                         stopbits=serial.STOPBITS_ONE,   
                         bytesize=serial.EIGHTBITS,
-                        timeout=0)
+                        timeout=1)
     ser_enabled = True
 except serial.SerialException as e:
     ser_enabled = False
@@ -21,9 +20,9 @@ except serial.SerialException as e:
 def stress(msg,nl,color='\033[0m'):
     if nl == 0:
         print()
-    print(color+"="*60)
-    print("{:^60}".format(msg))
-    print("="*60+'\033[0m')
+    print(color+"="*100)
+    print("{:^100}".format(msg))
+    print("="*100+'\033[0m')
     if nl == 2:
         print()
 
@@ -54,89 +53,88 @@ def serial_write(key, data):
 
 
 
-def wait_ack(expected_ack=65535, timeout=0.5):
+def wait_ack(expected_ack=65535):
     if not ser_enabled:
         return False
+    packet = ser.read(6)
+    if len(packet) < 6:
+        return False
+    low_byte =packet[2]
+    high_byte=packet[4]
+    # _, _, low_byte, _, high_byte, _ = packet
 
-    start_time = time.time()
-    state = 0
-    expected_low = expected_ack & 0xFF
-    expected_high = (expected_ack >> 8) & 0xFF
+    # if h1 != 0xFF or h2 != 0x55:
+    #     return False
 
-    while time.time() - start_time < timeout:
-        if ser.in_waiting > 0:
-            b = ser.read(1)
-            if not b:
-                continue
-            byte = b[0]
-            if state == 0:
-                if byte == 0xFF: 
-                    state = 1
-            elif state == 1:
-                if byte == 0x55: 
-                    state = 2
-            elif state == 2:   # Data_L (실제 데이터 하위 바이트 저장)
-                if byte == expected_low:
-                    state = 3
-            elif state == 3:   # Data_H (실제 데이터 상위 바이트 저장)
-                if byte == expected_high:
-                    return True
-        else:
-            time.sleep(0.001)
+    received_val = (high_byte << 8) | low_byte
+    return received_val == expected_ack
 
-    return False
 
-#튜플 가변인자로 패킷 수신 함수
+
 def packet_write(*args):
-    if ser_enabled == False:
-        return [0,0,0]
-    serial_raw(65535)
-    if not wait_ack():
-        return [-2,0,0]
+    if not ser_enabled:
+        return [0, 0, 0]
 
-    for key,data in args:
-        val = serial_write(key,data)
-        if not wait_ack(val):
-            return [-1,key,data]
+    ser.reset_input_buffer()
 
     serial_raw(65535)
-    if not wait_ack():
-        return [-3,0,0]
-    
-    return [1,0,0]
+    if not wait_ack(65535):
+        return [-2, 0, 0]
+
+    for key, data in args:
+        # ser.reset_input_buffer()
+        serial_write(key, data)
+        # if not wait_ack(val):
+        #     return [-1, key, data]
+    # ser.reset_input_buffer()
+    serial_raw(65535)
+    if not wait_ack(65535):
+        return [-3, 0, 0]
+
+    return [1, 0, 0]
 
 
 def run():
     if not ser_enabled:
-        stress(f"COULD NOT OPENS {ser.port}!",1)
+        stress(f"COULD NOT OPENS COM3!",1)
         return
 
     stress("TRANSMIT START!",2, '\033[32m')
 
     try:
+        fail=[]
         total_start_time = time.time()
         for i in range(100):
             pk_ret, pk_key, pk_data = packet_write(*[(n%31, i) for n in range(0, 100)])
             if pk_ret != 1:
-                match(pk_ret):
-                    case 0:
-                        print("SERIAL NOT AVAILABLE",end='')
-                    # case -1:
-                        print(f"Packet [{pk_key}:{pk_data}] 그저 Goa", end=' ')
-                    case -2:
-                        print("Packet [START] ACK Timeout!",end='')
-                    case -3:
-                        print(U"Packet [END] ACK Timeout!",end='')
-
-            print('\r>'+"{:^59}".format(f"Packet [{i+1}/100] SUCCEED!"),end='')
+                # match(pk_ret):
+                #     case 0:
+                #         print("SERIAL NOT AVAILABLE                 ",end='')
+                #     # case -1:
+                #         print(f"Packet [{pk_key}:{pk_data}] 그저 Goa",end='')
+                #     case -2:
+                #         print("Packet [START] ACK Timeout!          ",end='')
+                #     case -3:
+                #         print("Packet [END] ACK Timeout!            ",end='')
+                print('\033[31m'+'▮',end='',flush=True)
+                fail.append(i)
+            else:
+                print('\033[0m'+'▮',end='',flush=True)
+            # print('\r>'+"{:^99}".format(f"Packet [{i+1}/100] SUCCEED!"),end='')
         T=time.time()-total_start_time
-        print()
+        print('\r',end=''*100)
+        for i in range(100):
+            if i in fail:
+                print('\033[31m'+'▮',end='',flush=True)
+            else:
+                print('\033[32m'+'▮',end='',flush=True)
+
 
         stress(f"TOTAL : {time.time() - total_start_time:.3f}sec | PPS : {100/T:.3f}packet | DPS : {10000/T:.3f}data",0,'\033[32m')
 
     except KeyboardInterrupt:
         print()
-        stress("Terminated by USER",0,'\033[31m')
+        stress("Terminated by USSR",0,'\033[31m')
     finally:
         if ser.is_open:
             ser.close()

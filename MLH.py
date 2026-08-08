@@ -4,6 +4,7 @@ import serial
 import logging
 import numpy as np
 
+from csicam import CsiCamCapture
 import tracker as tr
 import packet as pk
 import param as p
@@ -15,11 +16,7 @@ import ik
 class MLH:
     def __init__(self):
         logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(lineno)d] %(message)s")
-        self.cap =   cv2.VideoCapture(1)                #카메라 연결
-        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
-        # self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
-        # self.cap.set(cv2.CAP_PROP_EXPOSURE, -7.5)
-        # self.cap.set(cv2.CAP_PROP_FPS, 30)
+        self.cap = cv2.VideoCapture(1)
         self.frame_cnt=0
         self.st=time.time()
         self.prev=0
@@ -40,42 +37,31 @@ class MLH:
 
             line_mask[:int(cam_h * p.UPPER_LINE_MASK_LIMIT), :] = 0
             line_mask[int(cam_h * p.LOWER_LINE_MASK_LIMIT):, :] = 0
-            line_mask[:, :int(cam_w * p.LEFT_LINE_MASK_LIMIT)] = 0
+            line_mask[:, :int(cam_w * p.LEFT_LINE_MASK_LIMIT) ] = 0
             line_mask[:, int(cam_w * p.RIGHT_LINE_MASK_LIMIT):] = 0
 
-            dst, c = lane.vsl_sobel_lanes(dst, line_mask)
+            line_hulls = tr.extract_approxPolyDP(line_mask, min_area=p.MIN_DETECT_AREA)
+            line_hulls = tr.sort_contour_area(line_hulls)
+            dst, c = lane.vsl_contours(dst, line_hulls,0,(0,255,255))
 
-            # 2. c를 기반으로 theta 및 linw_w 계산
             if c is not None:
-                theta, line_w = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
+                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)
+                theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
             else:
-                theta, line_w = 0.0, 0
-
-            cv2.imshow("dst", dst)
-            self.frame_cnt += 1
-
-            print('\r'+f"THETA: {theta:>7.3f}", end='\t\t')
+                theta = 0.0
 
             cv2.imshow("dst", dst)
             cv2.imshow("line", line_mask)
-            # cv2.imshow("sobel", sobel)
-            self.frame_cnt+=1
-            et=time.time()
 
-            print('\r'+f"THETA: {theta:>7.3f}",end='\t\t')
-
-            print(ik.cal_offset(theta),end='\t\t')
-            pk_ret, pk_key, pk_data=pk.packet_write(*ik.cal_offset(theta))
+            print('\r'+f"THETA: {theta:>7.3f}\t{ik.cal_offset(range(5,13),theta)}",end='\t\t')
+            pk_ret, pk_key, pk_data=pk.packet_write(*ik.cal_offset(range(5,13),theta))
             if pk_ret != 1:
                 match(pk_ret):
-                    case 0:
-                        print("SERIAL NOT AVAILABLE",end='')
-                    case -1:
-                        print(f"Packet [{pk_key}:{pk_data}] ACK Timeout!",end='')
-                    case -2:
-                        print("Packet [START] ACK Timeout!",end='')
-                    case -3:
-                        print("Packet [END] ACK Timeout!",end='')
+                    case  0: print( "SERIAL NOT AVAILABLE",end='                    ')
+                    case -1: print(f"Packet [{pk_key}:{pk_data}] ACK Timeout!",end='')
+                    case -2: print( "Packet [START] ACK Timeout!",end='             ')
+                    case -3: print( "Packet [END] ACK Timeout!",end='               ')
+            else:            print( "Packet Send SUCCEED!",end='                    ')
 
             key = cv2.waitKey(1)
             if key == ord("q"):
