@@ -41,4 +41,10 @@ def sel_contour_distance_point(contour, pos, num=2):                            
 def cal_contour_moment_point(contour):
     M = cv2.moments(contour)
     if M["m00"] != 0:
-        return (int(M["m10"] / M["m00"]),int(M["m01"] / M["m00"]))
+        return (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+    return (0, 0)
+
+
+
+def sort_contour_moment(contours, cam_h, cam_w):
+    return sorted(contours, key=lambda c: abs((cam_w // 2) - cal_contour_moment_point(c)[0])+abs(cam_h - cal_contour_moment_point(c)[1]))

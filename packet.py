@@ -32,6 +32,8 @@ def stress(msg,nl,color='\033[0m'):
 
 #단순 시리얼 전송 함수
 def serial_raw(val):
+    if not ser_enabled:
+        return 0
     down_byte = val & 0xFF
     up_byte = (val >> 8) & 0xFF
     try:
