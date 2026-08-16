@@ -4,7 +4,7 @@ import cv2
 from .calc_utils import *
 
 
-# contour extract functions
+
 def extract_contours(mask, min_area=0):                                            #컨투어 검출 함수
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)    #컨투어 검출
     return [c for c in contours if cv2.contourArea(c) >= min_area]                      #최소 넓이보다 넓은 컨투어 리스트 리턴
@@ -18,7 +18,7 @@ def extract_convexHulls(mask, min_area=0):                      #컨벡스헐 �
 
 
 
-def extract_approxPolyDP(mask, epsilon=0.005, min_area=0):                                       #컨투어 단순화 함수
+def extract_approxPolyDP(mask, epsilon=0.005, min_area=1000):                                       #컨투어 단순화 함수
     contours = extract_contours(mask, min_area)                                                     #컨투어 검출 
     polyDPs = map(lambda c: cv2.approxPolyDP(c, epsilon*cv2.arcLength(c, True), True), contours)    #(컨투어의 닫힌 윤곽선 길이*근사치)로 컨투어 단순화
     return list(polyDPs)                                                                            #단순화한 컨투어 리스트 리턴

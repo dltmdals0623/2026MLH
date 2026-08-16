@@ -1,9 +1,8 @@
 import numpy as np
 import cv2
-import logging
 
 from .calc_utils import *
- 
+
 
 # rectangle extract function
 def extract_rects(mask, min_area=0, min_w=0, min_h=0):                              #사각형 검출 함수
@@ -60,7 +59,7 @@ def sel_rect_distance_corner(rect, pos):    #사각형 {}점 선택 함수
         return (max([x, x+w], key=lambda p: abs(pos[0]-p)), y+h//2)                             #사각형의 좌우 두변 중 입력받은 좌표에서 가장 먼 변의 중점 리턴
     if y_valid:                                                                             #y좌표만 존재하면
         return (x+w//2, max([y, y+h], key=lambda p: abs(pos[1]-p)))                             #사각형의 상하 두변 중 입력받은 좌표에서 가장 먼 변의 중점 리턴
-    logging.error("SortError: Cannot calculate distance")                                   #x, y좌표가 모두 없으면 에러레벨로 로그 출력
+    print("\033[32mSortError: Cannot calculate distance\033[0m")                            #x, y좌표가 모두 없으면 에러레벨로 로그 출력
     return None                                                                             #빈 값 리턴
 
 

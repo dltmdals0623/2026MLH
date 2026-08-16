@@ -75,7 +75,7 @@ class CsiCamCapture:
 
 
 
-    def close(self):
+    def release(self):
         self.thread_running = False
 
         self.process.terminate()

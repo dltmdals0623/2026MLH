@@ -2,9 +2,11 @@ import time
 import serial
 
 ser_enabled = False
+succeed=[]
+fail=[]
 
 try:
-    ser = serial.Serial(port="COM3",
+    ser = serial.Serial(port="COM4",
                         baudrate=57600,
                         parity=serial.PARITY_NONE,
                         stopbits=serial.STOPBITS_ONE,   
@@ -36,6 +38,9 @@ def serial_raw(val):
         ser.write(bytearray([255, 85, down_byte, 255-down_byte, up_byte, 255-up_byte]))
     except serial.SerialException as e:
         print(f"SerialError: {str(e)}")
+        return 0
+
+    return val
 
 
 
@@ -61,10 +66,6 @@ def wait_ack(expected_ack=65535):
         return False
     low_byte =packet[2]
     high_byte=packet[4]
-    # _, _, low_byte, _, high_byte, _ = packet
-
-    # if h1 != 0xFF or h2 != 0x55:
-    #     return False
 
     received_val = (high_byte << 8) | low_byte
     return received_val == expected_ack
@@ -86,7 +87,7 @@ def packet_write(*args):
         serial_write(key, data)
         # if not wait_ack(val):
         #     return [-1, key, data]
-    # ser.reset_input_buffer()
+    ser.reset_input_buffer()
     serial_raw(65535)
     if not wait_ack(65535):
         return [-3, 0, 0]
@@ -96,43 +97,52 @@ def packet_write(*args):
 
 def run():
     if not ser_enabled:
-        stress(f"COULD NOT OPENS COM3!",1)
+        stress(f"COULD NOT OPENS COM4!",1)
         return
 
     stress("TRANSMIT START!",2, '\033[32m')
 
     try:
-        fail=[]
         total_start_time = time.time()
+        print('\r',end='▯'*100)
         for i in range(100):
             pk_ret, pk_key, pk_data = packet_write(*[(n%31, i) for n in range(0, 100)])
             if pk_ret != 1:
-                # match(pk_ret):
-                #     case 0:
-                #         print("SERIAL NOT AVAILABLE                 ",end='')
-                #     # case -1:
-                #         print(f"Packet [{pk_key}:{pk_data}] 그저 Goa",end='')
-                #     case -2:
-                #         print("Packet [START] ACK Timeout!          ",end='')
-                #     case -3:
-                #         print("Packet [END] ACK Timeout!            ",end='')
-                print('\033[31m'+'▮',end='',flush=True)
+                # print('\033[31m'+'▮',end='',flush=True)
                 fail.append(i)
             else:
-                print('\033[0m'+'▮',end='',flush=True)
-            # print('\r>'+"{:^99}".format(f"Packet [{i+1}/100] SUCCEED!"),end='')
+                # print('\033[0m'+'▮',end='',flush=True)
+                succeed.append(i)
+            print('\r'+''*i,end='',flush=True)
+            for j in range(i+1):
+                if j in fail:
+                    print('\033[31m'+'▮',end='',flush=True)
+                elif j in succeed:
+                    print('\033[0m'+'▮',end='',flush=True)
         T=time.time()-total_start_time
-        print('\r',end=''*100)
+
+        print('\r'+''*100,end='',flush=True)
         for i in range(100):
             if i in fail:
                 print('\033[31m'+'▮',end='',flush=True)
-            else:
+            elif i in succeed:
                 print('\033[32m'+'▮',end='',flush=True)
+            else:
+                print('\033[0m'+'▯',end='',flush=True)
 
-
-        stress(f"TOTAL : {time.time() - total_start_time:.3f}sec | PPS : {100/T:.3f}packet | DPS : {10000/T:.3f}data",0,'\033[32m')
+        print()
+        stress(f"TOTAL : {time.time() - total_start_time:.3f}sec | PPS : {100/T:.3f}packet | DPS : {10000/T:.3f}data | FAIL : {len(fail)}",0,'\033[32m')
 
     except KeyboardInterrupt:
+        print('\r',end=''*100)
+        for i in range(100):
+                    if i in fail:
+                        print('\033[31m'+'▮',end='',flush=True)
+                    elif i in succeed:
+                        print('\033[32m'+'▮',end='',flush=True)
+                    else:
+                        print('\033[0m'+'▯',end='',flush=True)
+        
         print()
         stress("Terminated by USSR",0,'\033[31m')
     finally:

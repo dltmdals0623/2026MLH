@@ -17,8 +17,7 @@ RIGHT_LINE_MASK_LIMIT = 0.95              #물체 감지 한계_우
 CURRENT_LINE = 1.50               #로봇 추정 위치 (세타값 중심점)
 
 SOBEL_THRESHOLD = 200         # Sobel 엣지 이진화 임계값
-GROUP_X_MARGIN = 50          # 같은 라인으로 묶을 최대 x거리
 
 L1=27
-L2=38.0 
-L3=86.0
+L2=37
+L3=82

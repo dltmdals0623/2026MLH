@@ -1,5 +1,3 @@
-import logging
-
 def rect_center(rect):      #사각형 중앙 좌표 계산 함수
     x, y, w, h = rect           #사각형 튜플에서 좌표, 크기 추출
     return (x + w/2, y + h/2)   #사각형 중앙 좌표 리턴
@@ -14,5 +12,5 @@ def distance(pos1, pos2):                               #좌표 거리 계산 �
         return abs(pos1[0] - pos2[0])                                   #두 점의 x좌표 거리 리턴
     if y_valid:                                                     #y좌표만 존재하면
         return abs(pos1[1] - pos2[1])                                   #두 점의 y좌표 거리 리턴
-    logging.error("SortError: Cannot calculate distance")           #x, y좌표가 모두 없으면 에러레벨로 로그 출력
+    print("\033[32mSortError: Cannot calculate distance\033[0m")           #x, y좌표가 모두 없으면 에러레벨로 로그 출력
     return None                                                     #빈 값 리턴        

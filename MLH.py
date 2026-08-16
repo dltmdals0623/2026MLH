@@ -1,33 +1,27 @@
-import cv2
-import time
-import serial
-import logging
-import numpy as np
-
-from csicam import CsiCamCapture
+from csicam import CsiCamCapture as ccc
 import tracker as tr
 import packet as pk
 import param as p
 import lane
-import ik
-
+import cv2
+# import ik
 
 
 class MLH:
     def __init__(self):
-        logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(lineno)d] %(message)s")
-        self.cap = cv2.VideoCapture(1)
-        self.frame_cnt=0
-        self.st=time.time()
-        self.prev=0
-
+        try:
+            self.cap = cv2.VideoCapture(0)
+        except:
+            self.cap = ccc(0)
+        self.gait_phase = 0  # 0: [FL, BR] 스윙 / 1: [FL, BR] 스탠스(밀기), 2: [FR, BL] 스윙 ...
+        self.last_theta = 0.0
 
 
     def main(self):
-            fst=time.time()
+            theta=0.0
             cam_ret, src = self.cap.read()
             if not cam_ret:
-                print("CameraError: Failed to capture camera")
+                print("\033[31mCameraError: Failed to capture camera\033[0m")
                 return False
             
             dst = cv2.GaussianBlur(src, (0, 0), 10)
@@ -44,42 +38,69 @@ class MLH:
             line_hulls = tr.sort_contour_area(line_hulls)
             dst, c = lane.vsl_contours(dst, line_hulls,0,(0,255,255))
 
+            pk_ret=None
+
             if c is not None:
-                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)
+                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)    
                 theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
-            else:
-                theta = 0.0
+
+                if abs(theta) <= 20:
+                    pk_ret=pk.serial_raw(3)
+                elif abs(theta) <= 30:
+                    if theta < 0:
+                        pk_ret=pk.serial_raw(2)
+                    else:
+                        pk_ret=pk.serial_raw(4)
+                else:
+                    if theta < 0:
+                        pk_ret=pk.serial_raw(1)
+                    else:
+                        pk_ret=pk.serial_raw(5)
+
+
+            # if self.gait_phase in [1, 3]:  # Stance(지지 및 밀기) 구간
+            # # V_x(전진 속도)와 W_z(theta 기반 회전 속도) 조합
+            #     v_x = 0.05
+            #     w_z = theta * 0.02
+            # else:
+            #     v_x = 0.0
+            #     w_z = 0.0
+
+            # offset = ik.cal_offset_with_cmd_vel(range(1, 13), v_x, 0.0, w_z)
 
             cv2.imshow("dst", dst)
             cv2.imshow("line", line_mask)
 
-            print('\r'+f"THETA: {theta:>7.3f}\t{ik.cal_offset(range(5,13),theta)}",end='\t\t')
-            pk_ret, pk_key, pk_data=pk.packet_write(*ik.cal_offset(range(5,13),theta))
-            if pk_ret != 1:
-                match(pk_ret):
-                    case  0: print( "SERIAL NOT AVAILABLE",end='                    ')
-                    case -1: print(f"Packet [{pk_key}:{pk_data}] ACK Timeout!",end='')
-                    case -2: print( "Packet [START] ACK Timeout!",end='             ')
-                    case -3: print( "Packet [END] ACK Timeout!",end='               ')
-            else:            print( "Packet Send SUCCEED!",end='                    ')
+            print('\r'+f"THETA: {theta:>7.3f}\t{pk_ret}",end='\t')
+
+            # print('\r'+f"THETA: {theta:>7.3f}\t{offset}",end='\t')
+
+            # pk_ret, pk_key, pk_data=pk.packet_write(*offset)
+            # if pk_ret != 1:
+            #     match(pk_ret):
+            #         case  0: print( "\033[31mSERIAL NOT AVAILABLE\033[0m",end='                    ')
+            #         # case -1: print(f"\033[31mPacket [{pk_key}:{pk_data}] ACK Timeout!\033[0m",end='')
+            #         case -2: print( "\033[31mPacket [START] ACK Timeout!\033[0m",end='             ')
+            #         case -3: print( "\033[31mPacket [END] ACK Timeout!\033[0m",end='               ')
+            # else:            print( "\033[32mPacket Sending SUCCEED\033[0m",end='                  ')
 
             key = cv2.waitKey(1)
             if key == ord("q"):
                 print()
+                print("\033[32mUSSR Terminated\033[0m")
                 return False
 
+            self.gait_phase = (self.gait_phase + 1) % 4
+            
             return True
-
 
 
     def run(self):
         try:
-            while True:
-                if not self.main():
-                    logging.info("USSR Terminated")
-                    break
+            while self.main():
+                pass
         except KeyboardInterrupt:
-            logging.info("\nPressed 'Ctrl+C'")
+            print("\n\033[32mPressed 'Ctrl+C'\033[0m")
         finally:
             self.cap.release()
             cv2.destroyAllWindows()
