@@ -1,15 +1,19 @@
+from csicam import CsiCamCapture
 import tracker as tr
 import packet as pk
 import param as p
 import lane
 import cv2
-# import ik
+import os
 
 
 class MLH:
     def __init__(self):
-        self.cap = cv2.VideoCapture(0)
-
+        if os.name == 'nt':
+            self.cap = cv2.VideoCapture(0)
+        else:
+            self.cap = CsiCamCapture(0)
+        
 
     def main(self):
             theta=0.0
@@ -21,20 +25,8 @@ class MLH:
             gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
             _, sobel=lane.sobel(gray)
 
-            # dst = cv2.GaussianBlur(src, (0, 0), 10)
-            # hsv = cv2.cvtColor(dst, cv2.COLOR_BGR2HSV)
             cam_h, cam_w = src.shape[:2]
-            # line_mask = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
-
-            # line_mask[:int(cam_h * p.UPPER_LINE_MASK_LIMIT), :] = 0
-            # line_mask[int(cam_h * p.LOWER_LINE_MASK_LIMIT):, :] = 0
-            # line_mask[:, :int(cam_w * p.LEFT_LINE_MASK_LIMIT) ] = 0
-            # line_mask[:, int(cam_w * p.RIGHT_LINE_MASK_LIMIT):] = 0
-
-            # line_hulls = tr.extract_approxPolyDP(line_mask, min_area=p.MIN_DETECT_AREA)
             line_hulls = tr.extract_contours(sobel, min_area=p.MIN_DETECT_AREA)
-            # line_hulls = tr.sort_contour_area(line_hulls)
-            # line_hulls = tr.sort_contour_moment(line_hulls,cam_h, cam_w)
             lines=lane.extract_lines(line_hulls,cam_h,cam_w//2)
             dst, c = lane.overlay_contours(src, lines,0,(0,255,255))
 
@@ -50,20 +42,6 @@ class MLH:
                 offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
             else:
                 offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
-
-                # if abs(theta) <= 20:
-                #     pk_ret=pk.serial_raw(3)
-                # elif abs(theta) <= 35:
-                #     if theta < 0:
-                #         pk_ret=pk.serial_raw(2)
-                #     else:
-                #         pk_ret=pk.serial_raw(4)
-                # else:
-                #     if theta < 0:
-                #         pk_ret=pk.serial_raw(1)
-                #     else:
-                #         pk_ret=pk.serial_raw(5)
-
 
             pk_ret=pk.packet_write(*offset)
             if pk_ret != 1:

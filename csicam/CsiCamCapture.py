@@ -71,7 +71,7 @@ class CsiCamCapture:
             if self.frame is None:
                 return False, None
             else:
-                return True, self.frame.copy()
+                return True, cv2.flip(self.frame.copy(),-1)
 
 
 

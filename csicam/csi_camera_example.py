@@ -15,5 +15,5 @@ while True:
 
 
 
-cap.close()
+cap.release()
 cv2.destroyAllWindows()

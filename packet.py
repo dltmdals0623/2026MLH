@@ -1,3 +1,4 @@
+import os
 import time
 import serial
 
@@ -6,30 +7,52 @@ succeed=[]
 fail=[]
 
 
+
 try:
-    ser = serial.Serial(port="COM4",
-                        baudrate=57600,
-                        parity=serial.PARITY_NONE,
-                        stopbits=serial.STOPBITS_ONE,   
-                        bytesize=serial.EIGHTBITS,
-                        timeout=1)
+    if os.name == 'nt':
+        ser = serial.Serial(port="COM4",
+                            baudrate=57600,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,
+                            bytesize=serial.EIGHTBITS,
+                            timeout=1)
+    else:
+        ser = serial.Serial(port="/dev/ttyUSB0",
+                    baudrate=57600,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE,
+                    bytesize=serial.EIGHTBITS,
+                    timeout=1)
     ser_enabled = True
 except serial.SerialException as e:
     ser=None
     ser_enabled = False
 
+
+
 def retry_serial():
     global ser, ser_enabled
     try:
-        ser = serial.Serial(port="COM4",
-                            baudrate=57600,
-                            parity=serial.PARITY_NONE,
-                            stopbits=serial.STOPBITS_ONE,   
-                            bytesize=serial.EIGHTBITS,
-                            timeout=1)
+        if os.name == 'nt':
+            ser = serial.Serial(port="COM4",
+                                baudrate=57600,
+                                parity=serial.PARITY_NONE,
+                                stopbits=serial.STOPBITS_ONE,
+                                bytesize=serial.EIGHTBITS,
+                                timeout=1)
+        else:
+            ser = serial.Serial(port="/dev/ttyUSB0",
+                        baudrate=57600,
+                        parity=serial.PARITY_NONE,
+                        stopbits=serial.STOPBITS_ONE,
+                        bytesize=serial.EIGHTBITS,
+                        timeout=1)
         ser_enabled = True
     except serial.SerialException as e:
+        ser=None
         ser_enabled = False
+
+
 
 #메시지 강조 함수
 def stress(msg,nl,color='\033[0m'):
@@ -91,16 +114,13 @@ def packet_write(*args):
         return 0
 
     ser.reset_input_buffer()
-
     serial_raw(65535)
     if not wait_ack(65535):
         return -2
 
     for key, data in args:
-        # ser.reset_input_buffer()
         serial_write(key, data)
-        # if not wait_ack(val):
-        #     return [-1, key, data]
+
     ser.reset_input_buffer()
     serial_raw(65535)
     if not wait_ack(65535):
