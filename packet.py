@@ -5,6 +5,7 @@ ser_enabled = False
 succeed=[]
 fail=[]
 
+
 try:
     ser = serial.Serial(port="COM4",
                         baudrate=57600,
@@ -14,9 +15,21 @@ try:
                         timeout=1)
     ser_enabled = True
 except serial.SerialException as e:
+    ser=None
     ser_enabled = False
 
-
+def retry_serial():
+    global ser, ser_enabled
+    try:
+        ser = serial.Serial(port="COM4",
+                            baudrate=57600,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,   
+                            bytesize=serial.EIGHTBITS,
+                            timeout=1)
+        ser_enabled = True
+    except serial.SerialException as e:
+        ser_enabled = False
 
 #메시지 강조 함수
 def stress(msg,nl,color='\033[0m'):
@@ -32,8 +45,6 @@ def stress(msg,nl,color='\033[0m'):
 
 #단순 시리얼 전송 함수
 def serial_raw(val):
-    if not ser_enabled:
-        return 0
     down_byte = val & 0xFF
     up_byte = (val >> 8) & 0xFF
     try:
@@ -76,13 +87,14 @@ def wait_ack(expected_ack=65535):
 
 def packet_write(*args):
     if not ser_enabled:
-        return [0, 0, 0]
+        retry_serial()
+        return 0
 
     ser.reset_input_buffer()
 
     serial_raw(65535)
     if not wait_ack(65535):
-        return [-2, 0, 0]
+        return -2
 
     for key, data in args:
         # ser.reset_input_buffer()
@@ -92,9 +104,9 @@ def packet_write(*args):
     ser.reset_input_buffer()
     serial_raw(65535)
     if not wait_ack(65535):
-        return [-3, 0, 0]
+        return -3
 
-    return [1, 0, 0]
+    return 1
 
 
 def run():
@@ -108,7 +120,7 @@ def run():
         total_start_time = time.time()
         print('\r',end='▯'*100)
         for i in range(100):
-            pk_ret, pk_key, pk_data = packet_write(*[(n%31, i) for n in range(0, 100)])
+            pk_ret = packet_write(*[(n%31, i) for n in range(0, 100)])
             if pk_ret != 1:
                 # print('\033[31m'+'▮',end='',flush=True)
                 fail.append(i)

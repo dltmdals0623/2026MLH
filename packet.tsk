@@ -7,26 +7,27 @@ o load param_dest:motion:1:50 param_src:dec_num:2
 o wait param_src:motion:1:51 lop:== param_src:bool_num:1 rop:then
 o while(1)
 o begin
+o wait param_src:cm:2 lop:== param_src:bool_num:0 rop:then
 o call faddr_dest:packet_read
-o call faddr_dest:reset_offset
+o call faddr_dest:apply_1offset
 o load param_dest:motion:1:50 param_src:dec_num:7
 o wait param_src:motion:1:51 lop:== param_src:bool_num:1 rop:then
-o call faddr_dest:apply_1offset
+o call faddr_dest:reset_1offset
 o load param_dest:motion:1:50 param_src:dec_num:8
 o wait param_src:motion:1:51 lop:== param_src:bool_num:1 rop:then
-o call faddr_dest:reset_offset
+o call faddr_dest:apply_2offset
 o load param_dest:motion:1:50 param_src:dec_num:9
 o wait param_src:motion:1:51 lop:== param_src:bool_num:1 rop:then
 o load param_dest:cm:0 param_src:dec_num:65535
-o call faddr_dest:apply_2offset
-o load param_dest:motion:1:50 param_src:dec_num:10
+o call faddr_dest:reset_2offset
+o load param_dest:motion:1:50 param_src:dec_num:8
 o wait param_src:motion:1:51 lop:== param_src:bool_num:1 rop:then
+x call faddr_dest:return_motion
 o end
 o end
 - 
 o function faddr_src:packet_read
 o begin
-o wait param_src:cm:2 lop:== param_src:bool_num:0 rop:then
 o load param_dest:var:rec param_src:cm:1
 o if param_src:var:rec lop:== param_src:dec_num:65535 rop:then
 o begin
@@ -47,6 +48,44 @@ o end
 o end
 o end
 - 
+- 
+- 
+o function faddr_src:return_motion
+o begin
+o compute param_dest:var:comb param_src:var:id1 aop:+ param_src:var:id2
+o compute param_dest:var:comb param_src:var:comb aop:+ param_src:var:id3
+o compute param_dest:var:comb param_src:var:comb aop:+ param_src:var:id4
+- 
+o if param_src:cm:2 lop:== param_src:bool_num:1 rop:|| param_src:var:comb lop:== param_src:dec_num:2048 rop:then
+o begin
+o call faddr_dest:packet_read
+o return
+o end
+- 
+- 
+o for param_var:_ param_src:dec_num:0 param_src:dec_num:2
+o begin
+o if param_src:cm:2 lop:== param_src:bool_num:1 rop:|| param_src:var:comb lop:== param_src:dec_num:2048 rop:then
+o begin
+o call faddr_dest:packet_read
+o return
+o end
+- 
+o if param_src:var:comb lop:> param_src:dec_num:2048 rop:then
+x if param_src:var:received_data lop:<= param_src:dec_num:75 rop:|| param_src:var:received_data lop:== param_src:dec_num:252 rop:then
+o load param_dest:motion:1:50 param_src:dec_num:3
+o elseif param_src:var:comb lop:< param_src:dec_num:2048 rop:then
+x elseif param_src:var:received_data lop:> param_src:dec_num:75 rop:|| param_src:var:received_data lop:== param_src:dec_num:251 rop:then
+o load param_dest:motion:1:50 param_src:dec_num:4
+o wait param_src:motion:1:51 lop:== param_src:bool_num:1 rop:then
+- 
+o load param_dest:cm:6 param_src:hrtimer_num:100
+o wait param_src:cm:6 lop:> param_src:hrtimer_num:0 rop:then
+o end
+o end
+- 
+- 
+- 
 o function faddr_src:apply_var
 o begin
 o if param_src:var:key lop:== param_src:dec_num:1 rop:then
@@ -57,56 +96,61 @@ o elseif param_src:var:key lop:== param_src:dec_num:3 rop:then
 o compute param_dest:var:id3 param_src:var:data aop:- param_src:dec_num:512
 o elseif param_src:var:key lop:== param_src:dec_num:4 rop:then
 o compute param_dest:var:id4 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:5 rop:then
-o compute param_dest:var:id5 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:6 rop:then
-o compute param_dest:var:id6 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:7 rop:then
-o compute param_dest:var:id7 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:8 rop:then
-o compute param_dest:var:id8 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:9 rop:then
-o compute param_dest:var:id9 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:10 rop:then
-o compute param_dest:var:id10 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:11 rop:then
-o compute param_dest:var:id11 param_src:var:data aop:- param_src:dec_num:512
-o elseif param_src:var:key lop:== param_src:dec_num:12 rop:then
-o compute param_dest:var:id12 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:5 rop:then
+x compute param_dest:var:id5 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:6 rop:then
+x compute param_dest:var:id6 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:7 rop:then
+x compute param_dest:var:id7 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:8 rop:then
+x compute param_dest:var:id8 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:9 rop:then
+x compute param_dest:var:id9 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:10 rop:then
+x compute param_dest:var:id10 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:11 rop:then
+x compute param_dest:var:id11 param_src:var:data aop:- param_src:dec_num:512
+x elseif param_src:var:key lop:== param_src:dec_num:12 rop:then
+x compute param_dest:var:id12 param_src:var:data aop:- param_src:dec_num:512
 o end
 - 
-o function faddr_src:reset_offset
+o function faddr_src:reset_1offset
 o begin
 o load param_dest:motion:1:52 param_src:dec_num:0
+o load param_dest:motion:4:52 param_src:dec_num:0
+x load param_dest:motion:5:52 param_src:dec_num:0
+x load param_dest:motion:8:52 param_src:dec_num:0
+x load param_dest:motion:9:52 param_src:dec_num:0
+x load param_dest:motion:12:52 param_src:dec_num:0
+o end
+- 
+o function faddr_src:reset_2offset
+o begin
 o load param_dest:motion:2:52 param_src:dec_num:0
 o load param_dest:motion:3:52 param_src:dec_num:0
-o load param_dest:motion:4:52 param_src:dec_num:0
-o load param_dest:motion:5:52 param_src:dec_num:0
-o load param_dest:motion:6:52 param_src:dec_num:0
-o load param_dest:motion:7:52 param_src:dec_num:0
-o load param_dest:motion:8:52 param_src:dec_num:0
-o load param_dest:motion:9:52 param_src:dec_num:0
-o load param_dest:motion:10:52 param_src:dec_num:0
-o load param_dest:motion:11:52 param_src:dec_num:0
-o load param_dest:motion:12:52 param_src:dec_num:0
+x load param_dest:motion:6:52 param_src:dec_num:0
+x load param_dest:motion:7:52 param_src:dec_num:0
+x load param_dest:motion:10:52 param_src:dec_num:0
+x load param_dest:motion:11:52 param_src:dec_num:0
 o end
+- 
 - 
 o function faddr_src:apply_1offset
 o begin
 o load param_dest:motion:1:52 param_src:var:id1
 o load param_dest:motion:4:52 param_src:var:id4
-o load param_dest:motion:5:52 param_src:var:id5
-o load param_dest:motion:8:52 param_src:var:id8
-o load param_dest:motion:9:52 param_src:var:id9
-o load param_dest:motion:12:52 param_src:var:id12
+x load param_dest:motion:5:52 param_src:var:id5
+x load param_dest:motion:8:52 param_src:var:id8
+x load param_dest:motion:9:52 param_src:var:id9
+x load param_dest:motion:12:52 param_src:var:id12
 o end
 - 
 o function faddr_src:apply_2offset
 o begin
 o load param_dest:motion:2:52 param_src:var:id2
 o load param_dest:motion:3:52 param_src:var:id3
-o load param_dest:motion:6:52 param_src:var:id6
-o load param_dest:motion:7:52 param_src:var:id7
-o load param_dest:motion:10:52 param_src:var:id10
-o load param_dest:motion:11:52 param_src:var:id11
+x load param_dest:motion:6:52 param_src:var:id6
+x load param_dest:motion:7:52 param_src:var:id7
+x load param_dest:motion:10:52 param_src:var:id10
+x load param_dest:motion:11:52 param_src:var:id11
 o end
