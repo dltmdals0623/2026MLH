@@ -13,14 +13,14 @@ class MLH:
             self.cap = cv2.VideoCapture(0)
         else:
             self.cap = CsiCamCapture(0)
-        
+
 
     def main(self):
             theta=0.0
             cam_ret, src = self.cap.read()
             if not cam_ret:
-                print("\033[31mCameraError: Failed to capture camera\033[0m")
-                return False
+                print('\r'+"\033[31mCameraError: Failed to capture camera\033[0m",end='')
+                return True
 
             gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
             _, sobel=lane.sobel(gray)
