@@ -48,8 +48,6 @@ class MLH:
                 match(pk_ret):
                     case 0:
                         print("SERIAL NOT AVAILABLE",end='')
-                    # case -1:
-                        # print(f"Packet [{pk_key}:{pk_data}] ACK Timeout!",end='')
                     case -2:
                         print("Packet [START] ACK Timeout!",end='')
                     case -3:

@@ -76,8 +76,7 @@ def sobel(src,ksize=3):
     sobel_x = cv2.Sobel(src, cv2.CV_64F, 1, 0, ksize=ksize)
     sobel_y = cv2.Sobel(src, cv2.CV_64F, 0, 1, ksize=ksize)
     sobel_mag = np.sqrt(sobel_x**2 + sobel_y**2)
-    
-    # 정규화 및 이진화 적용
+
     sobel_mag = np.uint8(255 * sobel_mag / np.max(sobel_mag)) if np.max(sobel_mag) > 0 else np.uint8(sobel_mag)
 
     sobel_mag[:int(cam_h * p.UPPER_LINE_MASK_LIMIT), :] = 0
@@ -92,7 +91,6 @@ def sobel(src,ksize=3):
 def extract_lines(edge_contours, cam_h, cam_cx):
     valid_lines = []
     for c in edge_contours:
-        # 컨투어 모멘트 중심 좌표 계산[cite: 8]
         center_pt = tr.cal_contour_moment_point(c)
         if center_pt is not None:
             valid_lines.append({
@@ -125,7 +123,7 @@ def select_main_lanes(valid_lines, cam_cx):
 
     left_groups = []
     right_groups = []
-    
+
     for g in groups:
         avg_cx = sum(line["cx"] for line in g) / len(g)
         if avg_cx < cam_cx:

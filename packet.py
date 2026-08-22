@@ -178,7 +178,7 @@ def run():
                         print('\033[0m'+'▯',end='',flush=True)
         
         print()
-        stress("Terminated by USSR",0,'\033[31m')
+        stress("Interrupted by USSR",0,'\033[31m')
     finally:
         if ser.is_open:
             ser.close()
