@@ -36,28 +36,31 @@ class MLH:
                 cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)    
                 theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
 
-            delta = min(int((abs(theta)**(2.2))*0.015),40)
+            offset = int((abs(theta)**(2.2))*0.015)
 
-            if theta>0:
-                offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
+            # if theta>0:
+            #     offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
+            # else:
+            #     offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
+            if abs(offset) < 40:
+                pk.serial_raw(offset+40)
+            elif offset < 0:
+                pk.serial_raw(254)
             else:
-                offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
+                pk.serial_raw(255)
 
-            pk_ret=pk.packet_write(*offset)
-            if pk_ret != 1:
-                match(pk_ret):
-                    case 0:
-                        print("SERIAL NOT AVAILABLE",end='')
-                    case -2:
-                        print("Packet [START] ACK Timeout!",end='')
-                    case -3:
-                        print("Packet [END] ACK Timeout!",end='')
+            # pk_ret=pk.packet_write(*offset)
+            # if pk_ret != 1:
+            #     match(pk_ret):
+            #         case 0:
+            #             print("SERIAL NOT AVAILABLE",end='')
+            #         case -2:
+            #             print("Packet [START] ACK Timeout!",end='')
+            #         case -3:
+            #             print("Packet [END] ACK Timeout!",end='')
 
-            try:
-                cv2.imshow("sobel", sobel)
-                cv2.imshow("dst", dst)
-            except:
-                print("No window")
+            cv2.imshow("sobel", sobel)
+            cv2.imshow("dst", dst)
 
             print('\r'+f"THETA: {theta:>7.3f}    {offset}    ",end='')
 
