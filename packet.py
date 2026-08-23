@@ -1,6 +1,8 @@
 import os
 import time
+import queue
 import serial
+import threading
 
 ser_enabled = False
 succeed=[]
@@ -28,6 +30,16 @@ except serial.SerialException as e:
     ser=None
     ser_enabled = False
 
+
+tx_queue = queue.Queue()
+
+def _tx_worker():
+    while True:
+        args = tx_queue.get()
+        packet_write(*args)
+        tx_queue.task_done()
+
+threading.Thread(target=_tx_worker, daemon=True).start()
 
 
 def retry_serial():

@@ -53,9 +53,11 @@ class MLH:
                     case -3:
                         print("Packet [END] ACK Timeout!",end='')
 
-
-            cv2.imshow("sobel", sobel)
-            cv2.imshow("dst", dst)
+            try:
+                cv2.imshow("sobel", sobel)
+                cv2.imshow("dst", dst)
+            except:
+                print("No window")
 
             print('\r'+f"THETA: {theta:>7.3f}    {offset}    ",end='')
 
