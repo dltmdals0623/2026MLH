@@ -1,13 +1,15 @@
 import numpy as np
-import cv2
 import logging
+import cv2
+import os
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(lineno)d] %(message)s")
 
-cap = cv2.VideoCapture(0)                                                               #VideoCapture(0) => 노트북카메라, VideoCapture(1) => USB카메라
-# cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
-# cap.set(cv2.CAP_PROP_EXPOSURE, -6.5)
-# cap.set(cv2.CAP_PROP_FPS, 30)
+if os.name == 'nt':
+    cap = cv2.VideoCapture(0)
+else:
+    cap = CsiCamCapture(0)
+
 cam_w = 0
 cam_h = 0
 
