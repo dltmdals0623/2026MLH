@@ -1,3 +1,4 @@
+from csicam import CsiCamCapture
 import numpy as np
 import logging
 import cv2
@@ -27,7 +28,7 @@ def mouse_event(event, x, y, _, param):
         if cnt == 0:
             hsv_val=np.append(hsv[y,x],hsv[y,x])
             print(hsv_val)
-        
+
         tmp1=hsv_val[:3]
         tmp2=hsv_val[3:]
         if cnt !=0:
@@ -38,18 +39,17 @@ def mouse_event(event, x, y, _, param):
             print(hsv[y,x], hsv_val)
 
         logging.info(f"MIN HSV CHANGED 2 {hsv_val[:3]}")
-            
         logging.info(f"MAX HSV CHANGED 2 {hsv_val[3:]}")
         cnt+=1
-    
+
     return
 
 while True:
     cam_ret, dst = cap.read()
     logging.debug(type(hsv_val[:3]), type(hsv_val[3:]),hsv_val[:3],hsv_val[3:])
     if not cam_ret:
-        logging.warning("CameraError: Failed to capture camera")
-        exit()
+        logging.warning("\rCameraError: Failed to capture camera",end='')
+        continue
     dst = cv2.GaussianBlur(dst, (0, 0), 5)
     hsv = cv2.cvtColor(dst, cv2.COLOR_BGR2HSV)
     cam_h, cam_w = dst.shape[:2]
