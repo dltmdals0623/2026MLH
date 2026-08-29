@@ -1,7 +1,9 @@
+import numpy as np
+
 MIN_DETECT_AREA =   50
 
-# MIN_LINE_HSV =   np.array([0,   0, 0])    #라인 최소 HSV
-# MAX_LINE_HSV =   np.array([255, 150, 150])  #라인 최대 HSV
+MIN_LINE_HSV =   np.array([0,   0, 0])    #라인 최소 HSV
+MAX_LINE_HSV =   np.array([255, 150, 150])  #라인 최대 HSV
 
 UPPER_LINE_MASK_LIMIT = 0.50              #라인 감지 한계_상
 LOWER_LINE_MASK_LIMIT = 0.85              #라인 감지 한계_하

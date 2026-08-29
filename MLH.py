@@ -27,7 +27,9 @@ class MLH:
                 input('\nPRESS ENTER 2 START')
                 self.start=True
 
-            gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+            hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
+            gray = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
+
             _, sobel=lane.sobel(gray)
 
             cam_h, cam_w = src.shape[:2]
