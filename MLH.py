@@ -13,15 +13,19 @@ class MLH:
             self.cap = cv2.VideoCapture(0)
         else:
             self.cap = CsiCamCapture(0)
+        self.start=False
 
 
     def main(self):
             theta=0.0
-            offset = None
+            offset=None
             cam_ret, src = self.cap.read()
             if not cam_ret:
                 print('\r'+"\033[31mCameraError: Failed to capture camera\033[0m",end='')
                 return True
+            elif cam_ret and self.start==False:
+                input('\nPRESS ENTER 2 START')
+                self.start=True
 
             gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
             _, sobel=lane.sobel(gray)
@@ -34,15 +38,15 @@ class MLH:
             if c is not None:
                 cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)    
                 theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
-
-                offset = int((abs(theta)**(1.1))*0.04)
+            if theta is not None:
+                offset = int((abs(theta)**(2.2))*0.015)
 
             # if theta>0:
             #     offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
             # else:
             #     offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
             if offset is not None:
-                if abs(offset) < 40:
+                if abs(offset) < 35:
                     pk.serial_raw(offset+40)
                 elif offset < 0:
                     pk.serial_raw(254)
@@ -62,6 +66,7 @@ class MLH:
             cv2.imshow("sobel", sobel)
             cv2.imshow("dst", dst)
 
+
             print('\r'+f"THETA: {theta:>7.3f}    {offset}    ",end='')
 
             key = cv2.waitKey(1)
@@ -69,7 +74,7 @@ class MLH:
                 print()
                 print("\033[32mUSSR Terminated\033[0m")
                 return False
-            
+
             return True
 
 
