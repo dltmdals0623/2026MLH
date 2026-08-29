@@ -17,6 +17,7 @@ class MLH:
 
     def main(self):
             theta=0.0
+            offset = None
             cam_ret, src = self.cap.read()
             if not cam_ret:
                 print('\r'+"\033[31mCameraError: Failed to capture camera\033[0m",end='')
@@ -30,24 +31,23 @@ class MLH:
             lines=lane.extract_lines(line_hulls,cam_h,cam_w//2)
             dst, c = lane.overlay_contours(src, lines,0,(0,255,255))
 
-            pk_ret=None
-
             if c is not None:
                 cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)    
                 theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
 
-            offset = int((abs(theta)**(2.2))*0.015)
+                offset = int((abs(theta)**(1.1))*0.04)
 
             # if theta>0:
             #     offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
             # else:
             #     offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
-            if abs(offset) < 40:
-                pk.serial_raw(offset+40)
-            elif offset < 0:
-                pk.serial_raw(254)
-            else:
-                pk.serial_raw(255)
+            if offset is not None:
+                if abs(offset) < 40:
+                    pk.serial_raw(offset+40)
+                elif offset < 0:
+                    pk.serial_raw(254)
+                else:
+                    pk.serial_raw(255)
 
             # pk_ret=pk.packet_write(*offset)
             # if pk_ret != 1:

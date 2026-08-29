@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import logging
 import tracker as tr
 import param as p
 
