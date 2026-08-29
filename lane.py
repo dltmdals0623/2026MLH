@@ -55,11 +55,12 @@ def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255), thk=1
              (collected_centers[0][1] + collected_centers[1][1]) // 2)
     elif len(collected_centers) == 1:
         _, cam_w = src.shape[:2]
-        single_c = collected_centers[0]
-        if single_c[0] < cam_w // 2:
-            c = (single_c[0]+(cam_w//2-single_c[0])*2, single_c[1])
-        else:
-            c = (single_c[0]-(single_c[0]-cam_w//2)*2, single_c[1])
+#        single_c = collected_centers[0]
+#        if single_c[0] < cam_w // 2:
+#            c = (cam_w//2+(single_c[0]*2//3), single_c[1])
+#        else:
+#            c = ((single_c[0]*2//3)-cam_w//2, single_c[1])
+        c=collected_centers[0]
     else:
         return src, None
 

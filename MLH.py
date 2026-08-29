@@ -26,6 +26,7 @@ class MLH:
             elif cam_ret and self.start==False:
                 input('\nPRESS ENTER 2 START')
                 self.start=True
+            src=cv2.GaussianBlur(src,(0,0),5)
 
             hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
             gray = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
@@ -38,22 +39,22 @@ class MLH:
             dst, c = lane.overlay_contours(src, lines,0,(0,255,255))
 
             if c is not None:
-                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)    
+                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)
                 theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
-            if theta is not None:
-                offset = int((abs(theta)**(2.2))*0.015)
+            if theta != 0.0:
+                offset = int((abs(theta)**(2.2))*0.01)
 
             # if theta>0:
             #     offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
             # else:
             #     offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
             if offset is not None:
-                if abs(offset) < 35:
-                    pk.serial_raw(offset+40)
-                elif offset < 0:
-                    pk.serial_raw(254)
+                if abs(offset) < 40:
+                    offset=pk.serial_raw(offset+40)
+                elif theta < 0:
+                    offset=pk.serial_raw(254)
                 else:
-                    pk.serial_raw(255)
+                    offset=pk.serial_raw(255)
 
             # pk_ret=pk.packet_write(*offset)
             # if pk_ret != 1:
@@ -65,6 +66,7 @@ class MLH:
             #         case -3:
             #             print("Packet [END] ACK Timeout!",end='')
 
+            cv2.imshow("hsv",gray)
             cv2.imshow("sobel", sobel)
             cv2.imshow("dst", dst)
 
