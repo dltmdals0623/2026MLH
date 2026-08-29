@@ -26,7 +26,7 @@ class MLH:
             elif cam_ret and self.start==False:
                 input('\nPRESS ENTER 2 START')
                 self.start=True
-            src=cv2.GaussianBlur(src,(0,0),5)
+            src=cv2.GaussianBlur(src,(0,0),1)
 
             hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
             gray = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
@@ -39,10 +39,10 @@ class MLH:
             dst, c = lane.overlay_contours(src, lines,0,(0,255,255))
 
             if c is not None:
-                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)
-                theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
+               cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)
+               theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
             if theta != 0.0:
-                offset = int((abs(theta)**(2.2))*0.01)
+               offset = int((theta*abs(theta)**0.85)*0.05)
 
             # if theta>0:
             #     offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]

@@ -79,10 +79,11 @@ def sobel(src,ksize=3):
 
     sobel_mag = np.uint8(255 * sobel_mag / np.max(sobel_mag)) if np.max(sobel_mag) > 0 else np.uint8(sobel_mag)
 
-    sobel_mag[:int(cam_h * p.UPPER_LINE_MASK_LIMIT), :] = 0
-    sobel_mag[int(cam_h * p.LOWER_LINE_MASK_LIMIT):, :] = 0
-    sobel_mag[:, :int(cam_w * p.LEFT_LINE_MASK_LIMIT)] = 0
-    sobel_mag[:, int(cam_w * p.RIGHT_LINE_MASK_LIMIT):] = 0
+    sobel_mag[:int(cam_h*p.UPPER_LINE_MASK_LIMIT), :] = 0
+    sobel_mag[int(cam_h*p.LOWER_LINE_MASK_LIMIT):, :int(cam_w*0.15)] = 0
+    sobel_mag[int(cam_h*p.LOWER_LINE_MASK_LIMIT):, int(cam_w*0.85):]=0
+#    sobel_mag[:, :int(cam_w * p.LEFT_LINE_MASK_LIMIT)] = 0
+#    sobel_mag[:, int(cam_w * p.RIGHT_LINE_MASK_LIMIT):] = 0
 
     return cv2.threshold(sobel_mag, p.SOBEL_THRESHOLD, 255, cv2.THRESH_BINARY)
 

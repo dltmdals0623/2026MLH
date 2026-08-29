@@ -1,10 +1,7 @@
 from csicam import CsiCamCapture
 import numpy as np
-import logging
 import cv2
 import os
-
-logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(lineno)d] %(message)s")
 
 if os.name == 'nt':
     cap = cv2.VideoCapture(0)
@@ -14,7 +11,7 @@ else:
 cam_w = 0
 cam_h = 0
 
-hsv_val=np.array([0,0,0,0,0,0]) 
+hsv_val=np.array([0,0,0,0,0,0])
 l=np.array([])
 cnt=0
 
@@ -38,17 +35,17 @@ def mouse_event(event, x, y, _, param):
             hsv_val=np.append(tmp1,tmp2)
             print(hsv[y,x], hsv_val)
 
-        logging.info(f"MIN HSV CHANGED 2 {hsv_val[:3]}")
-        logging.info(f"MAX HSV CHANGED 2 {hsv_val[3:]}")
+        print(f"MIN HSV CHANGED 2 {hsv_val[:3]}")
+        print(f"MAX HSV CHANGED 2 {hsv_val[3:]}")
         cnt+=1
 
     return
 
 while True:
     cam_ret, dst = cap.read()
-    logging.debug(type(hsv_val[:3]), type(hsv_val[3:]),hsv_val[:3],hsv_val[3:])
+    # print('\r',type(hsv_val[:3]), type(hsv_val[3:]),hsv_val[:3],hsv_val[3:],end='')
     if not cam_ret:
-        logging.warning("\rCameraError: Failed to capture camera",end='')
+        print('\r'+"\033[31mCameraError: Failed to capture camera\033[0m",end='')
         continue
     dst = cv2.GaussianBlur(dst, (0, 0), 5)
     hsv = cv2.cvtColor(dst, cv2.COLOR_BGR2HSV)
