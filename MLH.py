@@ -26,7 +26,7 @@ class MLH:
             elif cam_ret and self.start==False:
                 input('\nPRESS ENTER 2 START')
                 self.start=True
-            src=cv2.GaussianBlur(src,(0,0),1)
+            src=cv2.GaussianBlur(src,(0,0),3)
 
             hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
             gray = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
@@ -49,7 +49,7 @@ class MLH:
             # else:
             #     offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
             if offset is not None:
-                if abs(offset) < 40:
+                if abs(offset) <= 40:
                     offset=pk.serial_raw(offset+40)
                 elif theta < 0:
                     offset=pk.serial_raw(254)
