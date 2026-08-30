@@ -8,29 +8,29 @@ def get_theta(pos1, pos2):
             return 0,0
         return -np.degrees(np.arctan((pos1[0]-pos2[0]) / (pos1[1]-pos2[1])))
 
-def overlay_contours(src ,line_hulls, idx, bgr=(255,255,255),thk=3):
+def overlay_contours(src ,line_hulls, idx, bgr=(255,255,255),lineobj=0):
     if line_hulls:
         outline = np.zeros_like(src)
         range = np.zeros_like(src)
         for line_hull in line_hulls[:2]:
-            cv2.drawContours(outline, [line_hull], idx, bgr, thk)
+            cv2.drawContours(outline, [line_hull], idx, bgr, 3)
             cv2.drawContours(range, [line_hull], idx, bgr, -1)
         src = cv2.addWeighted(src, 1.0, range, 0.3, 0)
         src = cv2.addWeighted(src, 1.0, outline, 0.5, 0)
-        return vsl_mean(src,line_hulls)
+        return vsl_mean(src,line_hulls,lineobj=lineobj)
     return src, None
 
 
-def vsl_contours(src ,line_hulls, idx, bgr=(255,255,255)):
+def vsl_contours(src ,line_hulls, idx, bgr=(255,255,255),lineobj=0):
     if line_hulls:
         for line_hull in line_hulls[:2]:
             cv2.drawContours(src, [line_hull], idx, bgr, -1)
-        return vsl_mean(src,line_hulls)
+        return vsl_mean(src,line_hulls,lineobj=lineobj)
     return src, None
 
 
 
-def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255), thk=1):
+def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255),lineobj=0):
     if line_hulls is None or all(h is None for h in line_hulls):
         return src, None
 
@@ -47,7 +47,7 @@ def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255), thk=1
 
         collected_centers.append(tc)
 
-        cv2.circle(src, tc, rad, bgr1, thk)
+        cv2.circle(src, tc, rad, bgr1, 1)
         cv2.circle(tmpmask, tc, rad, bgr1,  -1)
 
     if len(collected_centers) == 2:
@@ -55,16 +55,18 @@ def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255), thk=1
              (collected_centers[0][1] + collected_centers[1][1]) // 2)
     elif len(collected_centers) == 1:
         _, cam_w = src.shape[:2]
-#        single_c = collected_centers[0]
-#        if single_c[0] < cam_w // 2:
-#            c = (cam_w//2+(single_c[0]*2//3), single_c[1])
-#        else:
-#            c = ((single_c[0]*2//3)-cam_w//2, single_c[1])
-        c=collected_centers[0]
+        if lineobj==1:
+            single_c = collected_centers[0]
+            if single_c[0] < cam_w // 2:
+                c = (cam_w//2+(single_c[0]*2//3), single_c[1])
+            else:
+                c = ((single_c[0]*2//3)-cam_w//2, single_c[1])
+        else:
+            c=collected_centers[0]
     else:
         return src, None
 
-    cv2.circle(src, c, rad, bgr2, thk)
+    cv2.circle(src, c, rad, bgr2, 1)
     cv2.circle(tmpmask, c, rad, bgr2,  -1)
     return cv2.addWeighted(src, 1.0, tmpmask, 0.5, 0), c
 

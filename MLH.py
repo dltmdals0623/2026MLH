@@ -29,25 +29,28 @@ class MLH:
             src=cv2.GaussianBlur(src,(0,0),3)
 
             hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
-            gray = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
+            line = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
+            obj = cv2.inRange(hsv, p.MIN_OBJ_HSV, p.MAX_OBJ_HSV)
 
-            _, sobel=lane.sobel(gray)
+            # _, sobel=lane.sobel(gray)
 
             cam_h, cam_w = src.shape[:2]
-            line_hulls = tr.extract_contours(sobel, min_area=p.MIN_DETECT_AREA)
+            line_hulls = tr.extract_contours(line, min_area=p.MIN_DETECT_AREA)
+            obj_hulls = tr.extract_contours(obj, min_area=p.MIN_DETECT_AREA)
             lines=lane.extract_lines(line_hulls,cam_h,cam_w//2)
-            dst, c = lane.overlay_contours(src, lines,0,(0,255,255))
+            dst, c = lane.overlay_contours(src, lines, 0, (  0, 255, 255), 0)
+            dst, c_obj = lane.overlay_contours(dst, obj_hulls, 0, (   0, 255,   0), 
+            1)
+
+            if c_obj is not None:
+                c=c_obj
 
             if c is not None:
-               cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0,255),1)
+               cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0, 255),1)
                theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
             if theta != 0.0:
-               offset = int((theta*abs(theta)**0.85)*0.05)
+                offset = int((theta*abs(theta)**0.85)*0.05)
 
-            # if theta>0:
-            #     offset = [(1, 512+delta//2), (2, 512), (3, 512), (4, 512+delta)]
-            # else:
-            #     offset = [(1, 512), (2, 512-delta//2), (3, 512-delta), (4, 512)]
             if offset is not None:
                 if abs(offset) <= 40:
                     offset=pk.serial_raw(offset+40)
@@ -66,8 +69,8 @@ class MLH:
             #         case -3:
             #             print("Packet [END] ACK Timeout!",end='')
 
-            cv2.imshow("hsv",gray)
-            cv2.imshow("sobel", sobel)
+            cv2.imshow("hsv",line)
+            cv2.imshow("obj", obj)
             cv2.imshow("dst", dst)
 
 
