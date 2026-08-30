@@ -2,8 +2,8 @@ import numpy as np
 
 MIN_DETECT_AREA =   1000
 
-MIN_LINE_HSV =   np.array([  25,  80, 164])    #라인 최소 HSV
-MAX_LINE_HSV =   np.array([ 101, 255, 231])  #라인 최대 HSV
+MIN_LINE_HSV =   np.array([  25, 130, 164])    #라인 최소 HSV
+MAX_LINE_HSV =   np.array([  33, 255, 219])  #라인 최대 HSV
 
 MIN_OBJ_HSV =   np.array([ 74, 100,  69])    #라인 최소 HSV
 MAX_OBJ_HSV =   np.array([ 84, 255, 145])  #라인 최대 HSV

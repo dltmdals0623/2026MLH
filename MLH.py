@@ -1,6 +1,7 @@
 from csicam import CsiCamCapture
 import tracker as tr
 import packet as pk
+import numpy as np
 import param as p
 import lane
 import cv2
@@ -21,17 +22,17 @@ class MLH:
             offset=None
             cam_ret, src = self.cap.read()
             if not cam_ret:
-                print('\r'+"\033[31mCameraError: Failed to capture camera\033[0m",end='')
+                print('\r'+"\033[31mFinding Camera..\033[0m",end='')
                 return True
             elif cam_ret and self.start==False:
-                input('\nPRESS ENTER 2 START')
+                input('\r'+'\033[32mCamera Detected!\033[0m\n\nPRESS ENTER 2 START')
                 self.start=True
             src=cv2.GaussianBlur(src,(0,0),3)
 
             hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
             line = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
             obj = cv2.inRange(hsv, p.MIN_OBJ_HSV, p.MAX_OBJ_HSV)
-
+#
             # _, sobel=lane.sobel(gray)
 
             cam_h, cam_w = src.shape[:2]
@@ -39,11 +40,10 @@ class MLH:
             obj_hulls = tr.extract_contours(obj, min_area=p.MIN_DETECT_AREA)
             lines=lane.extract_lines(line_hulls,cam_h,cam_w//2)
             dst, c = lane.overlay_contours(src, lines, 0, (  0, 255, 255), 0)
-            dst, c_obj = lane.overlay_contours(dst, obj_hulls, 0, (   0, 255,   0), 
-            1)
+#            dst, c_obj = lane.overlay_contours(dst, obj_hulls, 0, (   0, 255,   0), 1)
 
-            if c_obj is not None:
-                c=c_obj
+#            if c_obj is not None:
+#                c=c_obj
 
             if c is not None:
                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0, 255),1)
@@ -52,12 +52,12 @@ class MLH:
                 offset = int((theta*abs(theta)**0.85)*0.05)
 
             if offset is not None:
-                if abs(offset) <= 40:
-                    offset=pk.serial_raw(offset+40)
+                if abs(offset) <= 90:
+                    offset=pk.serial_raw(np.clip(offset,-60,60)+512)
                 elif theta < 0:
-                    offset=pk.serial_raw(254)
+                    offset=pk.serial_raw(254+512)
                 else:
-                    offset=pk.serial_raw(255)
+                    offset=pk.serial_raw(255+512)
 
             # pk_ret=pk.packet_write(*offset)
             # if pk_ret != 1:
