@@ -4,8 +4,6 @@ import subprocess
 import shlex
 import threading
 
-
-
 class CsiCamCapture:
     def __init__(self, cam_num, width=640, height=480, framerate=30):
         capture_command = (
