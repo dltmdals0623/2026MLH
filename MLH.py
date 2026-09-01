@@ -49,11 +49,11 @@ class MLH:
                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0, 255),1)
                theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
             if theta != 0.0:
-                offset = int((theta*abs(theta)**0.85)*0.05)
+                offset = int((theta*abs(theta)**1.1)*0.01)
 
             if offset is not None:
-                if abs(offset) <= 90:
-                    offset=pk.serial_raw(np.clip(offset,-60,60)+512)
+                if abs(offset) <= 60:
+                    offset=pk.serial_raw(np.clip(offset,-40,40)+512)
                 elif theta < 0:
                     offset=pk.serial_raw(254+512)
                 else:
