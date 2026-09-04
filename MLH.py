@@ -71,6 +71,7 @@ class MLH:
                         offset=pk.serial_raw(1)
                     else:
                         offset=pk.serial_raw(5)
+
             elif self.pobj is not None:
                 self.pobj=None
                 for _ in range(3):
