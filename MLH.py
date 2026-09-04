@@ -71,12 +71,17 @@ class MLH:
                     else:
                         offset=pk.serial_raw(5)
 
-            cv2.imshow("hsv",line)
-            cv2.imshow("obj", obj)
-            cv2.imshow("dst", dst)
-
-
             print('\r'+f"THETA: {theta:>7.3f}    {offset}    ",end='')
+
+            try:
+                 cv2.imshow("hsv",line)
+                 cv2.imshow("obj", obj)
+                 cv2.imshow("dst", dst)
+            except:
+                 print('NO SCREEN',end='')
+
+
+#            print('\r'+f"THETA: {theta:>7.3f}    {offset}    ",end='')
 
             key = cv2.waitKey(1)
             if key == ord("q"):
