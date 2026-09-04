@@ -15,6 +15,7 @@ class MLH:
         else:
             self.cap = CsiCamCapture(0)
         self.start=False
+        self.pobj=None
 
 
     def main(self):
@@ -49,6 +50,7 @@ class MLH:
             if theta != 0.0:
                 offset = int((theta*abs(theta)**1.1)*0.01)
 
+
             if offset is not None:
                 # if abs(offset) <= 60:
                 #     offset=pk.serial_raw(np.clip(offset,-40,40)+512)
@@ -69,13 +71,21 @@ class MLH:
                         offset=pk.serial_raw(1)
                     else:
                         offset=pk.serial_raw(5)
+            elif self.pobj is not None:
+                self.pobj=None
+                for _ in range(3):
+                    if self.pobj<0:
+                        offset=pk.serial_raw(2)
+                    else:
+                        offset=pk.serial_raw(4)
+
 
             cv2.imshow("hsv",line)
             cv2.imshow("obj", obj)
             cv2.imshow("dst", dst)
 
 
-            print('\r'+f"THETA: {theta:>7.3f}    {offset}    ",end='')
+            print('\r'+f"THETA: {theta:>7.3f}    {c}    ",end='')
 
             key = cv2.waitKey(1)
             if key == ord("q"):
