@@ -32,8 +32,6 @@ class MLH:
             hsv = cv2.cvtColor(src,cv2.COLOR_BGR2HSV)
             line = cv2.inRange(hsv, p.MIN_LINE_HSV, p.MAX_LINE_HSV)
             obj = cv2.inRange(hsv, p.MIN_OBJ_HSV, p.MAX_OBJ_HSV)
-#
-            # _, sobel=lane.sobel(gray)
 
             cam_h, cam_w = src.shape[:2]
             line_hulls = tr.extract_contours(line, min_area=p.MIN_DETECT_AREA)
@@ -42,8 +40,8 @@ class MLH:
             dst, c = lane.overlay_contours(src, lines, 0, (  0, 255, 255), 0)
             dst, c_obj = lane.overlay_contours(dst, obj_hulls, 0, (   0, 255,   0), 1)
 
-#            if c_obj is not None:
-#                c=c_obj
+            if c_obj is not None:
+                c=c_obj
 
             if c is not None:
                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0, 255),1)

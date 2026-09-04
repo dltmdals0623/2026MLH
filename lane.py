@@ -50,21 +50,26 @@ def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255),lineob
         cv2.circle(src, tc, rad, bgr1, 1)
         cv2.circle(tmpmask, tc, rad, bgr1,  -1)
 
+    if len(collected_centers) == 0:
+        return src, None
+
     if len(collected_centers) == 2:
         c = ((collected_centers[0][0] + collected_centers[1][0]) // 2,
              (collected_centers[0][1] + collected_centers[1][1]) // 2)
-    elif len(collected_centers) == 1:
-        _, cam_w = src.shape[:2]
-        if lineobj==1:
-            single_c = collected_centers[0]
-            if single_c[0] < cam_w // 2:
-                c = (cam_w//2+single_c[0], single_c[1])
+
+    _, cam_w = src.shape[:2]
+    if lineobj==1:
+        c = collected_centers[0]
+        if abs(cam_w // 2-c[0]) < cam_w // 4:
+            if c[0] < cam_w // 2:
+                c = (cam_w//2+c[0], c[1])
             else:
-                c = (cam_w//2-(cam_w-single_c[0]), single_c[1])
+                c = (cam_w//2-(cam_w-c[0]), c[1])
         else:
-            c=collected_centers[0]
+            c = (cam_w//2,c[1])
     else:
-        return src, None
+        c=collected_centers[0]
+
 
     cv2.circle(src, c, rad, bgr2, 1)
     cv2.circle(tmpmask, c, rad, bgr2,  -1)
