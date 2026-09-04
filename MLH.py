@@ -59,16 +59,6 @@ class MLH:
                 else:
                     offset=pk.serial_raw(255+512)
 
-            # pk_ret=pk.packet_write(*offset)
-            # if pk_ret != 1:
-            #     match(pk_ret):
-            #         case 0:
-            #             print("SERIAL NOT AVAILABLE",end='')
-            #         case -2:
-            #             print("Packet [START] ACK Timeout!",end='')
-            #         case -3:
-            #             print("Packet [END] ACK Timeout!",end='')
-
             cv2.imshow("hsv",line)
             cv2.imshow("obj", obj)
             cv2.imshow("dst", dst)

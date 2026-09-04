@@ -120,7 +120,5 @@ while True:
     if mask.shape is not None:
         blended = cv2.addWeighted(dst, 1.0, mask2, 1, 0)
 
-    # cv2.imshow("res", mask)
-    # cv2.imshow("dst", dst)
     cv2.imshow("blended", blended)
 cv2.destroyAllWindows()

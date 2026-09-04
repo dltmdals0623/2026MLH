@@ -16,9 +16,9 @@ try:
         hsv_dict = pickle.load(f)
     print("\033[32mHSV preset Found\033[0m\n")
     print(' '*14+f"\033[32m{'Current HSV':^13}    \033[31m{'Incoming HSV':^13}\033[0m\nMIN LINE HSV: \033[32m{MIN_LINE_HSV}\033[0m -> \033[31m{hsv_dict['min_line_hsv']}\033[0m\nMAX LINE HSV: \033[32m{MAX_LINE_HSV}\033[0m -> \033[31m{hsv_dict['max_line_hsv']}\033[0m\nMIN OBJ HSV:  \033[32m{MIN_OBJ_HSV}\033[0m -> \033[31m{hsv_dict['min_obj_hsv']}\033[0m\nMAX OBJ HSV:  \033[32m{MAX_OBJ_HSV}\033[0m -> \033[31m{hsv_dict['max_obj_hsv']}\033[0m")
-    res=input("Which HSV do you want to accept? (\033[32mCurrent\033[0m or \033[31mIncoming\033[0m)\n-> ")
+    res=input("Which HSV do you want to accept? (\033[32mCurrent(c)\033[0m or \033[31mIncoming(i)\033[0m)\n-> ")
     while 1:
-        if res.lower()=='current':
+        if res.lower() in ['current','c']:
             MIN_LINE_HSV = hsv_dict['min_line_hsv']
             MAX_LINE_HSV = hsv_dict['max_line_hsv']
 
@@ -26,7 +26,7 @@ try:
             MAX_OBJ_HSV  = hsv_dict['max_obj_hsv']
             print('\033[32mCurrent HSV Accepted\033[0m')
             break
-        elif res.lower()=='incoming':
+        elif res.lower() in ['incoming','i']:
             MIN_LINE_HSV = hsv_dict['min_line_hsv']
             MAX_LINE_HSV = hsv_dict['max_line_hsv']
 
