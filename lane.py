@@ -66,7 +66,7 @@ def vsl_mean(src, line_hulls, rad=7, bgr1=(255,127,127), bgr2=(0, 0, 255),lineob
             else:
                 c = (cam_w//2-(cam_w-c[0]), c[1])
         else:
-            c = (cam_w//2,c[1])
+            c = (cam_w//2 + abs(cam_w // 2-c[0])//(cam_w // 2-c[0])  ,c[1])
     else:
         c=collected_centers[0]
 
