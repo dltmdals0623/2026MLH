@@ -52,7 +52,7 @@ class MLH:
                 offset = int((theta*abs(theta)**0.85)*0.05)
 
             if offset is not None:
-                if abs(offset) <= 90:
+                if abs(offset) <= 40:
                     offset=pk.serial_raw(np.clip(offset,-60,60)+512)
                 elif theta < 0:
                     offset=pk.serial_raw(254+512)
