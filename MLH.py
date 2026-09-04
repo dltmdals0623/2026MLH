@@ -50,12 +50,25 @@ class MLH:
                 offset = int((theta*abs(theta)**1.1)*0.01)
 
             if offset is not None:
-                if abs(offset) <= 60:
-                    offset=pk.serial_raw(np.clip(offset,-40,40)+512)
-                elif theta < 0:
-                    offset=pk.serial_raw(254+512)
+                # if abs(offset) <= 60:
+                #     offset=pk.serial_raw(np.clip(offset,-40,40)+512)
+                # elif theta < 0:
+                #     offset=pk.serial_raw(254+512)
+                # else:
+                #     offset=pk.serial_raw(255+512)
+
+                if abs(theta) <= 20:
+                    offset=pk.serial_raw(3)
+                elif abs(theta) <= 40:
+                    if theta < 0:
+                        offset=pk.serial_raw(2)
+                    else:
+                        offset=pk.serial_raw(4)
                 else:
-                    offset=pk.serial_raw(255+512)
+                    if theta < 0:
+                        offset=pk.serial_raw(1)
+                    else:
+                        offset=pk.serial_raw(5)
 
             cv2.imshow("hsv",line)
             cv2.imshow("obj", obj)
