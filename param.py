@@ -3,7 +3,7 @@ import pickle
 
 HSV_PATH="hsv_sav.pkl"
 
-MIN_DETECT_AREA =   1000
+MIN_DETECT_AREA =   300
 
 MIN_LINE_HSV =   np.array([  25, 130, 164])
 MAX_LINE_HSV =   np.array([  33, 255, 219])
