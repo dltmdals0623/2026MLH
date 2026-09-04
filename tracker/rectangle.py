@@ -4,7 +4,7 @@ import cv2
 from .calc_utils import *
 
 
-# rectangle extract function
+
 def extract_rects(mask, min_area=0, min_w=0, min_h=0):                              #사각형 검출 함수
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)    #컨투어 검출
     contours = filter(lambda c: cv2.contourArea(c)>=min_area, contours)                 #최소 넓이 조건으로 컨투어 리스트 필터링
@@ -14,11 +14,8 @@ def extract_rects(mask, min_area=0, min_w=0, min_h=0):                          
     return list(rects)                                                                  #필터링된 사각형 리스트 리턴
 
 
-
-# rectangle sort functions
 def sort_rect_distance_point(rects, pos):                           #사각형 꼭짓점 거리순 선택 함수
     return sorted(rects, key=lambda r: distance(pos, rect_center(r)))   #중앙 좌표와 기준점의 거리 오름차순으로 정렬된 사각형 리스트 리턴
-
 
 
 def sort_rect_distance_stack(rects, stack, weights=None):   #사각형 스택 거리순 정렬 함수
@@ -35,16 +32,13 @@ def sort_rect_distance_stack(rects, stack, weights=None):   #사각형 스택 �
                   weights=weights))                                             #가중치 사용
 
 
-
 def sort_rect_size(rects):                                  #사각형 넓이순 정렬 함수
     return sorted(rects, key=lambda r: r[2]*r[3], reverse=True) #넓이 내림차순으로 정렬된 컨투어 리스트 리턴
 
 
 
-# point select functions
 def sel_rect_center(rect):                  #사각형 중앙 좌표 선택
     return tuple(map(int, rect_center(rect)))   #사각형 중앙 좌표 정수로 리턴 (rect_center() 출력은 float)
-
 
 
 def sel_rect_distance_corner(rect, pos):    #사각형 {}점 선택 함수
@@ -61,7 +55,6 @@ def sel_rect_distance_corner(rect, pos):    #사각형 {}점 선택 함수
         return (x+w//2, max([y, y+h], key=lambda p: abs(pos[1]-p)))                             #사각형의 상하 두변 중 입력받은 좌표에서 가장 먼 변의 중점 리턴
     print("\033[32mSortError: Cannot calculate distance\033[0m")                            #x, y좌표가 모두 없으면 에러레벨로 로그 출력
     return None                                                                             #빈 값 리턴
-
 
 
 def sel_rect_average_point_power(rect, pos, max_size, power=2): #사각형 가중치 거리 계산 함수

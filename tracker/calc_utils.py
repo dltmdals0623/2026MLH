@@ -2,6 +2,7 @@ def rect_center(rect):      #사각형 중앙 좌표 계산 함수
     x, y, w, h = rect           #사각형 튜플에서 좌표, 크기 추출
     return (x + w/2, y + h/2)   #사각형 중앙 좌표 리턴
 
+
 def distance(pos1, pos2):                               #좌표 거리 계산 함수
     x_valid = pos1[0] is not None and pos2[0] is not None   #pos1과 pos2의 x좌표 존재 여부
     y_valid = pos1[1] is not None and pos2[1] is not None   #pos1과 pos2의 y좌표 존재 여부

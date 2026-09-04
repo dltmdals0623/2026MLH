@@ -40,7 +40,7 @@ class MLH:
             obj_hulls = tr.extract_contours(obj, min_area=p.MIN_DETECT_AREA)
             lines=lane.extract_lines(line_hulls,cam_h,cam_w//2)
             dst, c = lane.overlay_contours(src, lines, 0, (  0, 255, 255), 0)
-#            dst, c_obj = lane.overlay_contours(dst, obj_hulls, 0, (   0, 255,   0), 1)
+            dst, c_obj = lane.overlay_contours(dst, obj_hulls, 0, (   0, 255,   0), 1)
 
 #            if c_obj is not None:
 #                c=c_obj
@@ -49,25 +49,15 @@ class MLH:
                cv2.line(dst,(cam_w//2, int(cam_h * p.CURRENT_LINE)), c,(  0,  0, 255),1)
                theta = lane.get_theta((cam_w//2, int(cam_h * p.CURRENT_LINE)), c)
             if theta != 0.0:
-                offset = int((theta*abs(theta)**0.85)*0.05)
+                offset = int((theta*abs(theta)**1.1)*0.01)
 
             if offset is not None:
-                if abs(offset) <= 40:
-                    offset=pk.serial_raw(np.clip(offset,-60,60)+512)
+                if abs(offset) <= 60:
+                    offset=pk.serial_raw(np.clip(offset,-40,40)+512)
                 elif theta < 0:
                     offset=pk.serial_raw(254+512)
                 else:
                     offset=pk.serial_raw(255+512)
-
-            # pk_ret=pk.packet_write(*offset)
-            # if pk_ret != 1:
-            #     match(pk_ret):
-            #         case 0:
-            #             print("SERIAL NOT AVAILABLE",end='')
-            #         case -2:
-            #             print("Packet [START] ACK Timeout!",end='')
-            #         case -3:
-            #             print("Packet [END] ACK Timeout!",end='')
 
             cv2.imshow("hsv",line)
             cv2.imshow("obj", obj)

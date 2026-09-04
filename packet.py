@@ -156,10 +156,8 @@ def run():
         for i in range(100):
             pk_ret = packet_write(*[(n%31, i) for n in range(0, 100)])
             if pk_ret != 1:
-                # print('\033[31m'+'▮',end='',flush=True)
                 fail.append(i)
             else:
-                # print('\033[0m'+'▮',end='',flush=True)
                 succeed.append(i)
             print('\r'+''*i,end='',flush=True)
             for j in range(i+1):
